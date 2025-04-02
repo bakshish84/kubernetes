@@ -13,10 +13,10 @@ for listing namespaces:
 # kubernetes get ns
 
 for creating new namespace
-# kubernetes create ns testing
+# kubernetes create ns learning
 
 for viewing pods in specific namespace
 # kubectl get pods -n kube-system
 
 for deleting namespace
-# kubectl remove ns testing
+# kubectl remove ns learning
