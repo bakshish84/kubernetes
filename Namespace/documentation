@@ -1,0 +1,22 @@
+In Kubernetes, namespaces are used to logically separate and organize resources in a cluster. When you create a Kubernetes cluster, several namespaces are created by default
+
+default: This is default namespace for kubernetes resources that dont explicitly specify a namespace.
+If pod, service or nay other resource is created with defining namespace it will be created in default namespace.
+
+Kube-system: This namespace is used by kubernetes system-level components and resources, including system services such as kubernetes dashboard, kube-dns, etcd, kube-proxy etc.
+
+kube-public: this namespace is meant for resources that should be accessible publicly within the cluster. used by kubernetes for resources that are intended to be visible to all users and components of the cluster.
+
+kube-node-lease: This namespace is used for node lease objects, which provide a way to track node availability and health.
+
+for listing namespaces:
+# kubernetes get ns
+
+for creating new namespace
+# kubernetes create ns testing
+
+for viewing pods in specific namespace
+# kubectl get pods -n kube-system
+
+for deleting namespace
+# kubectl remove ns testing
