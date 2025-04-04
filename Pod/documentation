@@ -1,0 +1,9 @@
+In Kubernetes, a Pod is the smallest and simplest unit in the Kubernetes object model that you can create or deploy. A Pod represents a running process on your cluster 
+and encapsulates an application container, storage resources, a unique network IP, and options that govern how the container(s) should run.
+
+In production you will work with the higher level resources like Deployments and Jobs and let Kubernetes manage the underlying pods.
+
+A Pod is a logical host for one or more containers. It represents a single instance of a running process in the cluster and is the smallest deployable unit in Kubernetes. Each Pod runs on a node and contains the containers that are tightly coupled, sharing the same network namespace, storage volumes, and other resources.
+
+A Pod can contain single container or multiple containers.
+
