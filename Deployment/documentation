@@ -1,0 +1,55 @@
+the most common way to run an application on your cluster. Deployment is a good fit for managing a stateless application workload on your cluster, where any Pod in the Deployment is interchangeable and can be replaced if needed.
+
+Deployment manages a set of pods to run an application workload, usually one that doesn’t maintain state.
+Deployment provides declarative updates for Pods and ReplicaSet.
+
+You can describe a desired state in deployment and deployment controller changes the actual state to desired state.
+
+It adds concept of rollouts and rollbacks.
+
+1. Create a deployment
+# kubectl apply -f Deployment-nginx.yaml
+
+2. View deployment
+# kubectl get deploy -o wide
+NAME           READY   UP-TO-DATE   AVAILABLE   AGE    CONTAINERS   IMAGES                            SELECTOR
+nginx-deploy   3/3     3            3           100s   nginx        cgr.dev/chainguard/nginx:latest   app=nginx-pods
+
+3. Updating a deployment
+# kubectl set image deployment/nginx-deploy nginx=cgr.dev/chainguard/nginx:latest
+  deployment.apps/nginx-deploy image updated
+
+4. To see rollout status
+# kubectl rollout status deployment/nginx-deploy
+  deployment "nginx-deploy" successfully rolled out
+
+5. to rollback an deployment to previous version
+# kubectl rollout undo deployment/nginx-deploy
+
+6. Check rollout history of deployment
+# kubectl rollout history deployment/nginx-deploy
+  deployment.apps/nginx-deploy 
+  REVISION  CHANGE-CAUSE
+  2         <none>
+  3         <none>
+
+7. To see the details of each revision, run:
+# kubectl rollout history deployment/nginx-deploy --revision=2
+
+8. Scaling a deployment
+# kubectl scale deployment nginx-deploy --replicas 4
+  deployment.apps/nginx-deploy scaled
+
+
+
+maxUnavailable: 25%:
+
+    25% of 8 replicas is 2 Pods. This means at most 2 Pods can be unavailable at the same time during the update.
+
+    While updating, Kubernetes can take down 2 Pods before the update continues.
+
+maxSurge: 25%:
+
+    25% of 8 replicas is 2 Pods. This means at most 2 additional Pods can be created temporarily during the update to ensure there are enough available Pods to serve traffic.
+
+    Kubernetes can scale up by creating 2 new Pods while the old ones are being updated.
