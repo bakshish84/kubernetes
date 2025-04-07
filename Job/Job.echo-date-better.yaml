@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: echo-date-better
+  namespace: learning
+spec:
+  parallelism: 2
+  completions: 2
+  activeDeadlineSeconds: 100
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: echo-date
+    spec:
+      containers:
+        - name: echo
+          image: cgr.dev/chainguard/busybox:latest
+          command: ["date"]
+          resources:
+            limits:
+              memory: "50Mi"
+            requests:
+              memory: "50Mi"
+              cpu: "250m"
+      restartPolicy: OnFailure
+          

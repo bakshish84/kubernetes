@@ -1,0 +1,8 @@
+jobs represent one off tasks that run to completion and then stop.
+
+A job creates one or more pods and will continue to retry execution of the Pods until a specified number of them succesfully terminate.
+
+As pods succesfully complete, the job tracks the succesful completions, when a specified number of succesful competions is reached, the job is complete.
+
+Deleting a job will clean up the Pods it created. Suspeding a job will delete its active pod until jo is resumed again.
+
