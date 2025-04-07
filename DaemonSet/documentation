@@ -1,0 +1,24 @@
+Dameon set runs a copy of the specified pod on all nodes(or a specified subset of ) in cluster.
+As nodes are removed from the cluster, those Pods are garbage collected. Deleting a DaemonSet will clean up the Pods it created.
+
+Useful for applicartion such as:
+
+1. Cluster Storage daemon
+2. Log aggregation
+3. Node monitoring
+
+
+
+
+
+
+
+[root@control DaemonSet]# kubectl get ds
+NAME              DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+fluentd-minimal   1         1         0       1            0           <none>          3s
+[root@control DaemonSet]# kubectl get pods
+NAME                    READY   STATUS    RESTARTS   AGE
+fluentd-minimal-rt87g   1/1     Running   0          10s
+[root@control DaemonSet]# kubectl get pods -o wide
+NAME                    READY   STATUS    RESTARTS   AGE   IP              NODE       NOMINATED NODE   READINESS GATES
+fluentd-minimal-rt87g   1/1     Running   0          14s   10.96.226.111   worker-1   <none>           <none>
