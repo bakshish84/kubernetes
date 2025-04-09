@@ -6,3 +6,20 @@ As pods succesfully complete, the job tracks the succesful completions, when a s
 
 Deleting a job will clean up the Pods it created. Suspeding a job will delete its active pod until jo is resumed again.
 
+Job Types:
+
+1. Job
+2. Cronjob
+3. Parallel jobs
+4. Completions and parallelism
+
+
+Key concepts:
+
+Backoff limit: This defines the number of retries for a failed pod. If pod fails, kubernetes will retry according to backoff policy, and the job will fail after reaching the limit.
+
+Active deadline seconds: This is the maximum duration the job can run, if the job doesn't complete within the specified time, it is terminated.
+
+TTL: kubernetes supports a TTL feature for a completed jobs, which helps clean up old jobs after they are done.
+
+Parallelism: A job can run multiple pods in parallel. For example: Settings parallelism: 3 in job speccification will run 3 pods simultaneously until task is completed.

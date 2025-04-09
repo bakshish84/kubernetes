@@ -7,3 +7,12 @@ A Pod is a logical host for one or more containers. It represents a single insta
 
 A Pod can contain single container or multiple containers.
 
+Pod Lifecycle:
+
+A Pod goes through several states from creation to termination.
+
+1. Pending: The pod has been accepted by kubernetes system, but one or more containers havent started yet. (waiting for resource and scheduling)
+2. Running: The Pod has been bound to node and all containers have been created.
+3. Succeeded: All containers in Pod have been terminated succesfully, and pod's work is complete.
+4. Failed: All containers in a pod have terminatwed with an error.
+5. Unknown: The state of Pod could not be determined.

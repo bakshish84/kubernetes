@@ -1,0 +1,15 @@
+A stateful set runs a group of pods, and maintains a sticky identity for each of those pods. This is useful for managing applications that need persistent storage or a stable, unique network identity.
+Stetful set is the workload API object used to manage stateful applications.
+
+If you want to use storage volumes to provide persistence for your workload, you can use a StatefulSet as part of the solution. Although individual Pods in a StatefulSet are susceptible to failure, the persistent Pod
+identifiers make it easier to match existing volumes to the new Pods that replace any that have failed
+
+StatefulSets are valuable for applications that require one or more of the following.
+
+    Stable, unique network identifiers.
+    Stable, persistent storage.
+    Ordered, graceful deployment and scaling.
+    Ordered, automated rolling updates.
+
+
+
