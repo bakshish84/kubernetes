@@ -1,0 +1,71 @@
+Storage requirements in Production
+
+1. Storage that doesnot depend on the pod lifecycle
+2. Storage must be available on all nodes.
+3. Storage needs to survive even if the cluster crashes.
+
+
+Persistent Volume:
+
+1. Cluster Resource
+2. Created via YAML file:
+    -Kind: PersistentVolume
+    -Spec: Eg how much storage ?
+3. Needs physical storage (like local disk, shared NFS storage, cloud storage)
+
+Depending on storage type, spec attributes differ in YAML.
+
+PV are not namespaced accessible to whole cluster.
+
+
+Types of volumes:
+
+1. EmptyDir: Temporary storage shared between containers in a pod. When a pod is created, an emptyDir is created. It persists as long as the pod is running, but it gets deleted when the pod is terminated.
+2. HostPath: Access to a node’s filesystem, The data stored in a hostPath volume is on the node's local filesystem. It persists across pod restarts but is dependent on the node.
+3. PersistentVolume (PV) and PersistentVolumeClaim (PVC): Persistent, durable storage that is independent of a specific pod, A PersistentVolume (PV) is a piece of storage in the cluster, which can be provisioned manually or dynamically. A PersistentVolumeClaim (PVC) is a      request for storage by a user or application, specifying the size and access modes required. PVCs bind to PVs based on the requested storage parameters.
+4. NFS (Network File System) : A shared file system that can be accessed by multiple pods across different nodes, Data persists as long as the NFS server is running. The volume can be mounted by multiple pods simultaneously.
+5. ConfigMap: Store configuration data that is typically required by your application (non-sensitive data), Data in a ConfigMap can be mounted as a volume or consumed via environment variables. The volume allows containers to read the configuration files.
+6. secret: Store sensitive information like passwords, tokens, or SSH keys, Like ConfigMap, data in a Secret can be mounted into a pod or passed as environment variables. Kubernetes stores the Secret data in a base64-encoded format, ensuring that sensitive information is handled securely
+7. CSI (Container Storage Interface) Volumes : For advanced storage systems that provide dynamic provisioning and integration with external storage providers, Volumes are provisioned by the external storage system and can be mounted in a pod as a volume.
+8. Amazon EBS, Azure Disk, and Google Persistent Disk: Cloud-based block storage solutions, These volumes can be dynamically provisioned by Kubernetes via the cloud provider's block storage service. Data persists as long as the volume is not deleted.
+9. CephFS and GlusterFS: Distributed file systems used for scalable and high-availability storage, These file systems allow pods to access a distributed storage system.
+
+
+Volume Mounts:
+
+Once a volume is defined in the Pod specification, it can be mounted to a container at specific location.
+- mountPath: the path in the container where volume will be mounted.
+- name: refers to volume defined in the pod spec.
+
+Volume access modes:
+
+- ReadWriteOnce (RWO): The volume can be mounted as read-write by a single node.
+- ReadOnlyMany (ROX): The volume can be mounted as read-only by many nodes.
+- ReadWriteMany (RWX): The volume can be mounted as read-write by many nodes.
+
+Storage class:
+
+A storage class allows users to specify storage requirements like performance or availability when creating persistent volumes, the storage class provides a way for kubernetes to dynamically provision storage.
+
+- provisioner: specifies the type of volumes to provision. (eg. AWS EBS, GCE PersistentDisk)
+- parameters: configuration specific to volume type.
+
+
+Persistent Volume (PV): is a piece of storage in the cluster that has been provisioned by an administrator or dynamically provisioned using Storage Classes. It is a resource in the cluster just like a node is a cluster resource. PVs are volume plugins like Volumes, but have a lifecycle independent of any individual Pod that uses the PV.
+
+PersistentVolumeClaims (PVC): is a request for storage by a user. It is similar to a Pod. Pods consume node resources and PVCs consume PV resources. Pods can request specific levels of resources (CPU and Memory). Claims can request specific size and access modes (e.g., they can be mounted ReadWriteOnce, ReadOnlyMany, ReadWriteMany, or ReadWriteOncePod.
+
+
+PVs are resources in the cluster. PVCs are requests for those resources
+
+Provisioning: There are two ways PVs may be provisioned: statically or dynamically
+
+Static: A cluster administrator creates a number of PVs. They carry the details of the real storage, which is available for use by cluster users. They exist in the Kubernetes API and are available for consumption
+
+Dynamic: When none of the static PVs the administrator created match a user's PersistentVolumeClaim, the cluster may try to dynamically provision a volume specially for the PVC. This provisioning is based on StorageClasses: the PVC must request a storage class and the administrator must have created and configured that class for dynamic provisioning to occur. To enable dynamic storage provisioning based on storage class, the cluster administrator needs to enable the DefaultStorageClass admission controller on the API server. 
+
+
+Storageclass:
+
+
+
