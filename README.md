@@ -16,5 +16,7 @@ Kubernetes core concepts:
 14. Jobs
 15. Network Policies
 16. Taints and Tolerations
+17. Health Probes
+18. Node Affinity
 
 

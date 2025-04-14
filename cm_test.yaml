@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  first_name: Bakshish
+  last_name: Singh
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: app-config-1

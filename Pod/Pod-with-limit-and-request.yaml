@@ -6,7 +6,13 @@ metadata:
 spec:
   containers:
     - name:  my-container
-      image: nginx
+      image: nginx/nginx-unprivileged
+      env:      # Setting environment variables from configmap (app-cm)
+      - name: APP_ENV      
+        valueFrom:
+         configMapKeyRef:
+          name: my-app-config
+          key: APP_ENV
       ports:
         - containerPort: 80
           protocol: TCP

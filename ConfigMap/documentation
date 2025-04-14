@@ -1,0 +1,21 @@
+A ConfigMap is an API object used to store non-confidential data in key-value pairs. Pods can consume ConfigMaps as environment variables, command-line arguments, or as configuration files in a volume.
+
+A ConfigMap allows you to decouple environment-specific configuration from your container images, so that your applications are easily portable.
+
+ConfigMap does not provide secrecy or encryption. If the data you want to store are confidential, use a Secret rather than a ConfigMap
+
+A ConfigMap is not designed to hold large chunks of data. The data stored in a ConfigMap cannot exceed 1 MiB. If you need to store settings that are larger than this limit, you may want to consider mounting 
+a volume or use a separate database or file service.
+
+There are four different ways to use configMap to configure a container inside a pod.
+
+1. Inside a container command and arguments
+2. Environment variables for a container.
+3. Add a file in read only volume for the application to read.
+4. Write code to run inside the Pod that uses the kubernetes API to read ConfigMap.
+
+For the first three methods, the kubelet uses the data from the ConfigMap when it launches container(s) for a Pod.
+The fourth method means you have to write code to read the ConfigMap and its data. However, because you're using the Kubernetes API directly, your application can subscribe to get updates whenever the ConfigMap changes, and react when that happens. 
+By accessing the Kubernetes API directly, this technique also lets you access a ConfigMap in a different namespace.
+
+
