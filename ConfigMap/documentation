@@ -18,4 +18,11 @@ For the first three methods, the kubelet uses the data from the ConfigMap when i
 The fourth method means you have to write code to read the ConfigMap and its data. However, because you're using the Kubernetes API directly, your application can subscribe to get updates whenever the ConfigMap changes, and react when that happens. 
 By accessing the Kubernetes API directly, this technique also lets you access a ConfigMap in a different namespace.
 
+Imperative way to create config map:
+
+    kubectl create cm app-cm --from-literal=firtname=bakshish --from-literal=lastname=singh
+
+From file:
+
+    kubectl create cm app-cm --from-file=app.config
 

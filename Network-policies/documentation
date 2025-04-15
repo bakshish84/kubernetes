@@ -1,0 +1,63 @@
+Kubernetes Pod networking requirements;
+
+1. Each Pod gets it's own IP.
+2. All pods can communicate with other pods without NAT.
+3. The IP of the pod is same throughout the cluster.
+
+Pod in one namespace can ping a pod in different namespace by default.
+
+
+using network policies we can control the traffic flow on IP level or port basis.
+
+[root@control ~]# kubectl get pods -A -o wide
+NAMESPACE     NAME                                       READY   STATUS    RESTARTS   AGE     IP             NODE       NOMINATED NODE   READINESS GATES
+default       nginx                                      1/1     Running   5          13d     10.96.226.74   worker-1   <none>           <none>
+kube-system   calico-kube-controllers-6b96c744b8-klmtq   1/1     Running   3          4d21h   10.96.42.206   control    <none>           <none>
+kube-system   calico-node-jmg52                          1/1     Running   5          81d     192.168.1.30   worker-2   <none>           <none>
+kube-system   calico-node-k8fjd                          1/1     Running   26         81d     192.168.1.10   control    <none>           <none>
+kube-system   calico-node-v2g2d                          1/1     Running   10         81d     192.168.1.20   worker-1   <none>           <none>
+kube-system   coredns-668d6bf9bc-kxd8g                   1/1     Running   3          4d21h   10.96.42.207   control    <none>           <none>
+kube-system   coredns-668d6bf9bc-tf58g                   1/1     Running   3          4d21h   10.96.42.202   control    <none>           <none>
+kube-system   etcd-control                               1/1     Running   28         81d     192.168.1.10   control    <none>           <none>
+kube-system   kube-apiserver-control                     1/1     Running   18         19d     192.168.1.10   control    <none>           <none>
+kube-system   kube-controller-manager-control            1/1     Running   27         13d     192.168.1.10   control    <none>           <none>
+kube-system   kube-proxy-22tfg                           1/1     Running   25         81d     192.168.1.10   control    <none>           <none>
+kube-system   kube-proxy-snkzf                           1/1     Running   5          81d     192.168.1.30   worker-2   <none>           <none>
+kube-system   kube-proxy-vjm2k                           1/1     Running   10         81d     192.168.1.20   worker-1   <none>           <none>
+kube-system   kube-scheduler-control                     1/1     Running   78         81d     192.168.1.10   control    <none>           <none>
+namespace-a   nginx-a                                    1/1     Running   0          5m56s   10.96.226.72   worker-1   <none>           <none>
+namespace-b   nginx-b                                    1/1     Running   0          5m52s   10.96.226.71   worker-1   <none>           <none>
+namespace-c   nginx-c                                    1/1     Running   0          5m50s   10.96.226.73   worker-1   <none>           <none>
+[root@control ~]# kubectl -n namespace-a exec nginx-a --curl 10.96.226.71
+error: unknown flag: --curl
+See 'kubectl exec --help' for usage.
+[root@control ~]# kubectl -n namespace-a exec nginx-a -- curl 10.96.226.71
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+100   615  100   615    0     0  85666      0 --:--:-- --:--:-- --:--:-- 87857
+[root@control ~]# 
+
+

@@ -1,0 +1,30 @@
+Node Selectors are great for basic pod placement based on node labels. But what if you need more control over where your pods land? Enter Node Affinity! 
+Node Affinity lets you define complex rules for where your pods can be scheduled based on node labels.
+
+Properties in Node Affinity
+
+1. requiredDuringSchedulingIgnoredDuringExecution
+2. preferredDuringSchedulingIgnoredDuringExecution
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: redis
+  name: redis-3
+spec:
+  containers:
+  - image: redis
+    name: redis
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+              - key: disktype
+                operator: In
+                values:
+                - ssd

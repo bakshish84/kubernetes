@@ -1,0 +1,29 @@
+# Tainting a Node:
+
+kubectl taint node worker-1 key=gpu:NoSchedule
+
+# To remove a taint:
+
+kubectl taint node worker-1 key=gpu:NoSchedule-
+
+# Adding toleration to pod:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: redis
+  name: redis
+spec:
+  containers:
+  - image: redis
+    name: redis
+  tolerations:
+  - key: "gpu"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+
+
+Taints and tolerations are powerful tools, but they have limitations. They cannot handle complex expressions like "AND" or "OR." So, what do we use in that case? We use a combination of Taints, tolerance, and Node affinity
