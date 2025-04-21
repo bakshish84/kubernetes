@@ -1,0 +1,10 @@
+1. Init Containers are those containers that run before the main or app container for the particular work.
+2. Init Containers motive for completion which means that the given work needs to be completed.
+3. If a pod fails due to Init Containers then, Kubernetes restarts the init Container until it will succeed.
+
+
+Use cases:
+1. To install dependencies before running the application on main container.
+2. clone a git repository into main volume
+3. Generate configuration files dynamically
+4. Database Configuration

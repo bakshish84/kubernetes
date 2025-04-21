@@ -25,3 +25,6 @@ spec:
               cpu: "250m"
       restartPolicy: OnFailure
           
+
+# Two parallel instances (Pods) can be run for this job and 2 succesful completions are required to be mark job as complete. The jo is allowed to run for 180 seconds if its not completed with 180s it will be marked failed or terminated.
+#with backofflimit set to 1, if pod fails it will try to restart it only once.

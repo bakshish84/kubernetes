@@ -6,6 +6,18 @@ As pods succesfully complete, the job tracks the succesful completions, when a s
 
 Deleting a job will clean up the Pods it created. Suspeding a job will delete its active pod until jo is resumed again.
 
+Use Cases:
+1. Database backup script needs to run
+2. Running batch process
+3. Running the task on scheduled interval
+4. Log Rotation
+
+Key features:
+1. One-time execution:  if task needs to be executed one time.
+2. Parallelism: If you want to multiple pods ate same time
+3. Scheduling: If you want to schedule a specific number of pods after a specific time
+4. Restart Policy: You can specify whether job should restart if fails.
+
 Job Types:
 
 1. Job
@@ -18,8 +30,11 @@ Key concepts:
 
 Backoff limit: This defines the number of retries for a failed pod. If pod fails, kubernetes will retry according to backoff policy, and the job will fail after reaching the limit.
 
-Active deadline seconds: This is the maximum duration the job can run, if the job doesn't complete within the specified time, it is terminated.
+Active deadline seconds: This is the maximum duration the job is allowed to run from start to finish, if the job doesn't complete within the specified time, it is terminated.
 
 TTL: kubernetes supports a TTL feature for a completed jobs, which helps clean up old jobs after they are done.
 
 Parallelism: A job can run multiple pods in parallel. For example: Settings parallelism: 3 in job speccification will run 3 pods simultaneously until task is completed.
+
+Completions: The total number of successful Pod runs required for the job to be considered complete.
+if set to 2, The job will be marked complete when 2 pods have succesfully finished.

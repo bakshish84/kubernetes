@@ -26,3 +26,11 @@ From file:
 
     kubectl create cm app-cm --from-file=app.config
 
+
+
+
+Secrets:
+1. There are lot of confidential information that needs to be stored on the server such as database usernames, passwords, or API Keys. To keep all the important data secure, Kubernetes has a Secrets feature that encrypts the data. Secrets can store data up to 1MB
+which would be enough. Secrets can be created via imperative or declarative ways. Secrets are stored in the /tmps directory and can be accessible to pods only.
+2. Creating the Secrets is the first process that can be created by commands or a YAML file.
+3. After creating the Secrets, applications need to use the credentials or database credentials which will be done by injecting with the pods.
