@@ -7,7 +7,7 @@ metadata:
 spec:
   containers:
   - name: liveness
-    image: registry.k8s.io/busybox
+    image: ubuntu
     args:
     - /bin/sh
     - -c
@@ -19,3 +19,4 @@ spec:
         - /tmp/healthy
       initialDelaySeconds: 5
       periodSeconds: 5
+      timeoutSeconds: 30

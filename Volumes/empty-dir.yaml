@@ -18,4 +18,7 @@ spec:
       mountPath: "/tmp/container-2"
   volumes:
     - name: empty-volume
-      emptyDir:{}
+      emptyDir: {}
+
+
+#The file created in one container in mounted path will be visible in second container also.

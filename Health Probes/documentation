@@ -13,3 +13,12 @@ Type of health probes:
 Types of health checks they perform?
 1. HTTP/TCP/command
 
+
+Liveness Probe (Health Check)
+1. It is rich feature in kubernetes that is used to check the health of your application.
+2. By default doesnot check health check of applications we have to define the probe in manifest file to use this feature.
+3. livenessProbe expects a 0 output which means the application is running perfectly. But if there is any other output except 0 then livenessProbe recreates the container and repeats the same process.
+4. livenessProbe repeats the process after particular seconds or minutes(specified by you) to check the health of the application.
+5. If there is a load balancer attached to multiple pods then, livenessProbe checks the health of the application and if the application’s health check status is not healthy
+then livenessProbe removes the particular pod from the load balancer and recreates the new pod and repeats the same process.
+
