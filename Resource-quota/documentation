@@ -1,0 +1,31 @@
+Resource quota helps in managing and dictributing resources according to requirements.
+
+A pod in K8s will run with no limits on CPU and memory by default.
+
+CPU is specified in units of cores and memory in specified in unit of bytes.
+
+A namespace can be assigned to ResoureQuota objects, this will help to limit amount of usafge to objects within the namespace.
+
+
+
+
+Resource Control: By setting limits, you prevent a single pod from monopolizing resources, which can lead to issues like out-of-memory (OOM) kills or CPU starvation.
+
+A pod requesting more memory than is available will be killed due to an OOM (Out of Memory) error.
+
+Every container that is running on the namespace must have its own CPU limit.
+● The total amount of CPU used by all the containers in the namespace should not exceed a specified limit.
+
+Each tenant (pod) requires specific resources like CPU and memory to function:
+
+Requests: This is the minimum amount of resources a pod needs to operate smoothly. Think of it as a guaranteed reservation for the pod.
+Limits: This is the maximum amount of resources a pod can use. It acts as a safety cap to prevent any pod from consuming more than its fair share and disrupting others.
+
+
+1. If the requests and limits are given in the manifest file, it works accordingly.
+2. If the requests are given but the limit is not provided then, the default limit will be used.
+3. If the requests are not provided but the limit is provided then, the requests will be equal to the limit.
+
+
+
+kubectl autoscale deployment thdeploy --cpu-percent=30 --min=1 --max=5

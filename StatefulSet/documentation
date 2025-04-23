@@ -13,3 +13,17 @@ StatefulSets are valuable for applications that require one or more of the follo
 
 
 
+Stateful applications are those applications that contain the previous states or data of the applications. If the applications restart or move to other environments then, the data and
+the state of the applications still exist. Examples of Stateful applications includes PostgreSQL, MySQL, messages queues. These applications ensures that the data, application reliability, and state of the
+applications will be taken care of by the StatefulSets Object in Kubernetes.
+
+
+StatefulSets are used for those applications that require data persistence such as databases. StatefulSets allow to attachment and mount of the permanent volumes to the disk. So, if any pod is rescheduled or restarted it will have
+the all data.
+
+
+Key Features and Facts of StatefulSets:
+1. StatefulSets provides the Order pod creation which provides the unique name to each pod in a predictable order such as web-1, web-2, and so on.
+2. StatefulSets provides the Stable Network Identity which makes it easy to connect with the pods.
+3. StatefulSets provides the Data Persistence which stores the data in the databases and whenever the pod is restarted or rescheduled, the pods get the same persistent data.
+

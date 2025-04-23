@@ -1,0 +1,8 @@
+Kubernetes supports autoscaling, By default, Kubernetes does not provide AutoScaling. If you need AutoScaling, then you have to create hpa(Horizontal Pod AutoScaling) and vpa(Vertical Pod
+AutoScaling) objects.
+● Kubernetes supports the autoscaling of the pods based on Observed CPU Utilization.
+
+Scaling only supports Scalable objects like Controller, deployment, or ReplicaSet.
+● HPA is implemented as a Kubernetes API resource and a controller.
+● The Controller periodically adjusts the number of replicas in a replication controller or deployment to match the observed average CPU utilization to the target specified in
+the manifest file or command.

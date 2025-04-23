@@ -1,0 +1,17 @@
+There are multiple types of states for the Pod lifecycle that we will discuss here:
+1. Pending : When a pod is created it has to go through the pending status in which Master nodes allocate the nodes to where to create the pod. The pods will remain in the
+pending state until all the necessary resources are allocated such as CPU, memory, and storage.
+2. Running : Once the pod has been scheduled to a node, it comes into the Running Status. Once the pod comes into a running state, the containers within the pods will be
+creating and doing the tasks that have been provided in the manifest file.
+3. Succeeded : Once the pods have completed their task then, the pods come in the Succeeded state and then terminates.
+4. Failed : Once the pods intend to create but due to some issues the pods are not creating and showing the Failed state leads to issues with the configurations which need to be
+addressed by the creator of the file.
+5. CrashLoopBackOff : This is the advanced state of a Failed state where the container is crashing and restarts. To fix this issue, the creator of the file needs to check the manifest file.
+6. Unknown : In some cases, the Kubernetes may lose the connection with the nodes to create the pods that show the unknown status of the particular pod.
+7. Termination : When a pod is no longer available it comes in the termination process. Once the pod is deleted, it can not restart again the same pods and is removed from the
+entire Kubernetes cluster.
+There are some conditions that come under while creating Pods:
+● Initialized : This condition shows whether all the init containers have started successfully or not. If the status is false it means the init containers have not started.
+● Ready : This condition shows the pod is ready to use.
+● ContainersReady : As the name suggests, if the containers are ready within a pod it will show True in the status.
+● PodScheduled : This condition shows that the pod has been scheduled on the node.

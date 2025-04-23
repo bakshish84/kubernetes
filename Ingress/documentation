@@ -1,0 +1,35 @@
+Ingress is used for managing external traffic to services within the cluster.
+
+Ingress helps to expose the HTTP and HTTPS routes from outside of the cluster.
+Ingress enables Path-based and Host-based routing
+Ingress supoorts load balancing and SSL termination
+
+It redirects the incoming requests to the right services based on the Web URL or path in the address.
+Ingress provides the encryption feature and helps to balance the load of the applications
+
+Why do we use Ingress because the load balancer supports the same thing?
+
+Ingress is used to manage the external traffic to the services within the cluster which provides features like host-based routing, path-based routing, SSL termination, and more.
+Where a Load balancer is used to manage the traffic but the load balancer does not provide the fine-grained access control like Ingress.
+
+There are 2 types of routing in Ingress:
+
+1. Path-baswed routing: Path based routing directs traffic to different services based on path such as example.com/apple
+2. Host-based routing: host based routing directs traffic to different services based on website's URL such as apple.example.com
+
+
+To implement ingress, We have to deploy Ingress Controller. We can use Ingress controller according to our requirements.
+
+
+
+# helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+# helm repo update
+
+# helm install nginx-ingress ingress-nginx/ingress-nginx --create-namespace --namespace ingress-nginx
+
+
+# kubectl get pods -n ingress-nginx
+NAME                                                      READY   STATUS    RESTARTS   AGE
+nginx-ingress-ingress-nginx-controller-6cd56f9f65-5xsct   1/1     Running   0          52s
+
+
