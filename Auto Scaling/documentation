@@ -6,3 +6,7 @@ Scaling only supports Scalable objects like Controller, deployment, or ReplicaSe
 ● HPA is implemented as a Kubernetes API resource and a controller.
 ● The Controller periodically adjusts the number of replicas in a replication controller or deployment to match the observed average CPU utilization to the target specified in
 the manifest file or command.
+
+
+To perform HPA, we need one Kubernetes component which is a metrics server. To download this, use the below command.
+curl -LO https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml

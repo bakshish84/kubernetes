@@ -1,0 +1,57 @@
+Helm is a Kubernetes package manager in which the multiple numbers of YAML files such as the backend, and frontend come under one roof(helm) and deploy using helm.
+
+Helm is an open-source package manager that will help you to automate the deployment of applications for Kubernetes in the simplest way.
+
+In the help deployment, all the YAML files related to the application deployment will be in the helm chart. So, if you want to deploy your application you don’t need to deploy each YAML
+file one by one. Instead, you can just write one command helm install <your-chart-name> and it will deploy your entire application in one go.
+
+Benefits
+● Because of the helm, the time will be saved.
+● It makes the automation more smoothly
+● Reduced complexity of deployments.
+● Once files can be implemented in different environments. You just need to change the values according to the environmental requirements.
+● Better scalability.
+● Perform rollback at any time.
+● Effective for applying security updates.
+● Increase the speed of deployments and many more.
+
+
+
+Install Helm
+curl -fsSL -o get_helm.sh
+https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+# helm version
+version.BuildInfo{Version:"v3.17.2", GitCommit:"cc0bbbd6d6276b83880042c1ecb34087e84d41eb", GitTreeState:"clean", GoVersion:"go1.23.7"}
+
+To list all repositories
+
+# helm list
+NAME    NAMESPACE       REVISION        UPDATED STATUS  CHART   APP VERSION
+[root@control kubernetes]#
+
+
+Create a stable repository using the helm
+# helm repo add stable https://charts.helm.sh/stable
+
+
+# helm repo list
+NAME            URL                                       
+gitlab          https://charts.gitlab.io                  
+ingress-nginx   https://kubernetes.github.io/ingress-nginx
+stable          https://charts.helm.sh/stable
+
+
+# helm repo remove stable
+"stable" has been removed from your repositories
+
+# helm repo list
+NAME            URL                                       
+gitlab          https://charts.gitlab.io                  
+ingress-nginx   https://kubernetes.github.io/ingress-nginx
+[root@control kubernetes]#
+
+To Create our own repo
+
+# helm create my-repo

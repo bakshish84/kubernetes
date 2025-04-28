@@ -1,0 +1,17 @@
+apiVersion: projectcalico.org/v3
+kind: IPPool
+metadata:
+  creationTimestamp: "2025-01-23T18:48:03Z"
+  name: default-ipv4-ippool
+  resourceVersion: "590"
+  uid: ae2a2016-ff06-4e83-b7b6-3913c0c7a3bf
+spec:
+  allowedUses:
+  - Workload
+  - Tunnel
+  blockSize: 26
+  cidr: 10.96.0.0/16
+  ipipMode: Never
+  natOutgoing: true
+  nodeSelector: all()
+  vxlanMode: Always

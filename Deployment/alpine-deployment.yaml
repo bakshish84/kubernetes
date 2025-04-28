@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alpine-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: alpine
+  template:
+    metadata:
+      labels:
+        pod: alpine
+    spec:
+      containers:
+        - name: ping-container
+          image: alpine
+          command: ["/bin/sh", "-c", "sleep 36000000"]
+          stdin: true
+          tty: true

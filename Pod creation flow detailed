@@ -1,0 +1,95 @@
+1. Pod Spec submitted (Kubectl --> API server)
+
+    Pod is created via kubectl run, kubectl apply, or via controller like Deployment
+    The command is sent to kubernetes API server
+    The pod spec is stored in etcd (The cluster's key value store)
+
+2. Scheduler assigns node (scheduler --> API server)
+
+    The Kube Scheduler watches for unassigned pods (with .spec.nodeName == "")
+    It evaluates resource requests, taints, affinities etc.
+    It selects a suitable node
+    The scheduler updates the POD object by setting .spec.nodeName
+
+    After this Pod is "bound" to a specific node.
+
+3. Kubelet watches API server (Kubelet on target node)
+    The kubelet running in assigned node watches API server for pod specs assigned to it node.
+    Once it detects new pod, it:
+    a. Pulls the pod spec.
+    b. Prepares the environment
+    c. Instructs the container Runtime (via CRI) to start the pod sandbox and containers.
+
+4. Kubelet ---> CRI (Container runtime Interface)
+
+    Kubelet interacts with the container runtime using gRPC based CRI API:
+    a. Sends RunPodSandbox --> This setups the pause container
+    b. Sends CreateContainer for each container in the pod.
+    c. Sends StartContainer for each one.
+
+In CRI-O this is handled by:
+
+    1. CRI-O daemon: implements CRI, manages containers.
+    2. conmon: A monitor process per container.
+    3. runc: Low level OCI runtime
+
+5. CRI-O Stack Details
+
+    a. RunPodSandbox (Kubelet --> CRI-O)      (POd Sandbox is a special container that setps netwrok nsmaespace,    manage volumes IPC, hostname, act as base container for all other contianers in pod attach to)
+
+        CRI-O starts a pause container (sandbox)
+        Sets up network namespace (via CNI plugin like calico, flannel)
+        Mounts Volumes, setup cgroups etc.
+
+    b. CreateContainer (CRI-O -> conmon -> runc)
+     - CRI-O
+        Prepares the container spec. (OCI-Compliant)
+        Uses common to manage logs, signals and lifecycle
+
+     - conmon
+        Starts a runc process to create the container.
+        Monitors the conatiner in the background.
+
+     - runc:
+        uses linux namespaces, cgroups and chroot to create actual container.
+        Runs the container process inside the Pod's sandbox.
+
+
+Summary of Key Components:
+
+Component	        Role
+API Server	        Frontend for Kubernetes; all components talk to it
+etcd	            Stores the cluster state (pod specs, etc.)
+Scheduler	        Assigns pods to nodes
+Kubelet	            Node agent; watches API server and manages pods
+CRI-O	            Implements CRI; interfaces with conmon and runc
+conmon	            Spawns and monitors containers, handles logging
+runc	            OCI runtime; does the actual container creation
+pause container	    Holds the network namespace for all containers in the pod
+
+
+
+
+
+Trace a Pod creation live:
+
+# See logs from Kubelet
+journalctl -u kubelet -f
+
+# Monitor CRI-O logs
+journalctl -u crio -f
+
+# Check what containers CRI-O is managing
+crictl ps -a
+
+# Inspect a pod sandbox
+crictl pods
+
+# Inspect a specific container
+crictl inspect <container-id>
+
+
+
+
+
+# journalctl -u kubelet --since "1 hour ago" -o short-iso -f

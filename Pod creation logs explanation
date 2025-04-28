@@ -1,0 +1,171 @@
+worker-1 crio[767]: time="2025-04-25T13:56:26.164687155-04:00" level=info msg="Running pod sandbox: learning/nginx-learning/POD" id=74f51986-3b92-44cb-a342-fb3c1a4d5bc5 name=/runtime.v1.RuntimeService/RunPodSandbox
+
+	Kubernetes via Kubelet is asking CRI-O to initialize a pod-level sandbox for a pod named nginx-learning, CRI-O is initiating the Pod sandbox for a kubernetes Pod names
+
+	worker-1 is hostname of kubernetes node.
+	Process crio (PID 767) is reporing the logs
+	Level-info:  This is informational message not a warning or error
+	msg= : Actual log message content
+		CRI-O is strating ("Running") a pod snadbox, in namespace learning wuth name nginx-learning and container type is POD. (This is infra container that setups the networking and other pod-level details)
+		id=... (Unique ID for this pod sandbox)
+		name=/runtume.v1.RuntimeService/RunPodSandbox:   This is gRPC method being onvoked- CRI-O uses gRPC to communicate with kubernetes Kubelet. RubPodSandbox sets up the basic enviornment (network namespace, cgroups, etc) for Pod.
+***********************************************************************************************************************************
+worker-1 crio[767]: time="2025-04-25T13:56:26.164792802-04:00" level=info msg="Allowed annotations are specified for workload [io.containers.trace-syscall]"
+
+	This is a follow up informational log entry, In kubernetes annotations are key-value metadata attached to objects, They dont affect the behaviour directly but can be used to pass information to runtimes like CRI-O.
+
+	When present, it tells CRI-O to allow or set up syscall tracing for this container.
+
+	This is used for observability, debugging, or security auditing — it records which syscalls the container makes.
+
+***********************************************************************************************************************************************
+
+worker-1 crio[767]: time="2025-04-25T13:56:26.175161497-04:00" level=info msg="Got pod network &{Name:nginx-learning Namespace:learning ID:97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e UID:0ebc1e17-c524-4f35-856a-14c7a768a37a 
+NetNS:/var/run/netns/5849ed50-6b81-458b-809d-f995f679bc23 Networks:[{Name:k8s-pod-network Ifname:eth0}] RuntimeConfig:map[k8s-pod-network:{IP: MAC: PortMappings:[] Bandwidth:<nil> IpRanges:[] CgroupPath:kubepods-besteffort-pod0ebc1e17_c524_4f35_856a_14c7a768a37a.slice 
+PodAnnotations:0xc0011e6cf0}] Aliases:map[]}"
+
+	This log provides a deep look into network setup phase of a pod in kubernetes, Thus mesage is CRI-O confirming that it has received or resokved the networking configuration for pod nginx-learning in namespace learning
+	ID: Internal CRI-O ID for this sandbox container
+	UID: Kubernetes UID uniquelt identifying this pod.
+	NetNS: Path to linix network namespace for this Pod.   Each Pod run in its own isolated network namespace, and this file links to that namespace via linux kernel (/poc - based network stack isolation)
+	Networks:[{Name:k8s-pod-network Ifname:eth0}]: -  CRI-O is configuring a network interface: 
+		K8s-pod-network - The name of CNI plugin or network configuration
+		ifname: eth0 - the name of interface inside the container.
+	
+	IP: MAC: not yest assigned here, mat be filled in afetr network plugin allocates them.
+	PortMappings:[] -  This pod doesnot expose ports explicitly.
+	Bandwidth: <nil> - no bandwidth limits have been configured.
+	IpRanges: [] - No specific IP ranges are being requested
+	CgroupPath:kubepods-besteffort-pod0ebc1e17_c524_4f35_856a_14c7a768a37a.slice - the cgroup slice path used to contorl pod resource usage: In this case Pod is running in besteffort QoS class which means it has no resource limit set (no CPU or memory limits)
+	Aliases:map[] - No network aliases are assigned to this Pod.
+
+**********************************************************************************************************************************************
+
+worker-1 crio[767]: time="2025-04-25T13:56:26.175397745-04:00" level=info msg="Adding pod learning_nginx-learning to CNI network \"k8s-pod-network\" (type=calico)"
+	
+	This log entry shoes a critical step in kubernetes pod networking: adding a pod to CNI network using a specific CNI plugin
+		CRI-O is initiating the process of attaching the Pod network namespace to a container network interface CNI network.
+		CNI network \"k8s-pod-network\" (type=calico)" -  This is the network defined in your CNI configuration file typically found under /etc/cni/net.d/
+		This is the primary CNI configuration responsible for assigning IPs, setting up virtual interfaces (e.g., veth pairs), and possibly routing rules
+
+		(type=calico) -  tells that CNI plugin being used is Calico.
+
+
+
+In summary:
+
+CRI-O is passing the control to calico, The configured CNI plugin, to :
+
+	Attach the pod to k8s-pod-network
+	Assign an IPConnec to braoder kubrnetes network fabric
+	Potentially apply ploicies or routing
+
+*********************************************************************************************************************************************
+
+worker-1 crio[767]: 2025-04-25 13:56:26.229 [INFO][4172] plugin.go 326: Calico CNI found existing endpoint: &{{WorkloadEndpoint projectcalico.org/v3} {worker--1-k8s-nginx--learning-eth0  learning  0ebc1e17-c524-4f35-856a-14c7a768a37a 466259 0 2025-04-25 13:56:25 -0400 EDT <nil> <nil> 
+map[projectcalico.org/namespace:learning projectcalico.org/orchestrator:k8s projectcalico.org/serviceaccount:default run:nginx-learning] map[] [] [] []} {k8s  worker-1  nginx-learning eth0 default [] []   [kns.learning ksa.learning.default] calia75c70ad211  [] []}} 
+ContainerID="97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" Namespace="learning" Pod="nginx-learning" WorkloadEndpoint="worker--1-k8s-nginx--learning-"
+
+
+
+
+
+
+
+
+************************************************************************************************************************************************************************************
+
+	
+worker-1 crio[767]: 2025-04-25 13:56:26.231 [INFO][4172] k8s.go 77: Extracted identifiers for CmdAddK8s ContainerID="97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" Namespace="learning" Pod="nginx-learning" WorkloadEndpoint="worker--1-k8s-nginx--learning-eth0"
+
+
+*************************************************************
+worker-1 crio[767]: 2025-04-25 13:56:26.280 [INFO][4178] ipam_plugin.go 230: Calico CNI IPAM request count IPv4=1 IPv6=0 ContainerID="97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" HandleID="k8s-pod-network.97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" 
+Workload="worker--1-k8s-nginx--learning-eth0"
+
+	This CRI-O and Calico log entry shows the IP address allocation (IPAM) process for a Kubernetes pod network setup.
+	IPAM request: Calico is being asked to assign an 1 IPv4 address and 0 IPv6 address
+	This implies:
+		network is IPv4 only.
+		Each pod typically gets one primary IP address, used on eth0
+	
+	This HandleID allows Calico to track and manage the IP assignment and ensure it is properly cleaned up when the pod is deleted.
+
+********************************************************************************************************************************************
+worker-1 crio[767]: 2025-04-25 13:56:26.299 [INFO][4178] ipam_plugin.go 270: Auto assigning IP ContainerID="97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" HandleID="k8s-pod-network.97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" 
+Workload="worker--1-k8s-nginx--learning-eth0" assignArgs=ipam.AutoAssignArgs{Num4:1, Num6:0, HandleID:(*string)(0xc0002f7a90), Attrs:map[string]string{"namespace":"learning", "node":"worker-1", "pod":"nginx-learning", "timestamp":"2025-04-25 17:56:26.280052053 +0000 UTC"}, 
+Hostname:"worker-1", IPv4Pools:[]net.IPNet{}, IPv6Pools:[]net.IPNet{}, MaxBlocksPerHost:0, HostReservedAttrIPv4s:(*ipam.HostReservedAttr)(nil), HostReservedAttrIPv6s:(*ipam.HostReservedAttr)(nil), IntendedUse:"Workload"}
+
+	system reveals that Calico is auto-assigning an IP address to a pod’s network interface. This is a continuation of the pod networking setup in Kubernetes using Calico
+	Auto assigning IP -  means calico has made the decision to automatically assign an IP address to Pod network interface (eth0)
+
+	assignArgs=ipam.AutoAssignArgs{...}   -   shows the arguments used by calico autoassign function within IPAM.
+
+
+**********************************************************************************************************************************************************************
+worker-1 crio[767]: 2025-04-25 13:56:26.299 [INFO][4178] ipam_plugin.go 358: About to acquire host-wide IPAM lock.
+worker-1 crio[767]: 2025-04-25 13:56:26.299 [INFO][4178] ipam_plugin.go 373: Acquired host-wide IPAM lock.
+
+	IPAM Request: Calico requests an IP address from the available IP address pools.
+	Acquire Lock: Before assigning an IP address, Calico acquires the host-wide IPAM lock to ensure no other process can modify the IPAM state concurrently.
+	Prevents Collisions: Without the lock, two processes might assign the same IP to different containers, leading to IP conflicts and networking issues.
+
+******************************************************************************************************************************
+
+worker-1 crio[767]: 2025-04-25 13:56:26.299 [INFO][4178] ipam.go 107: Auto-assign 1 ipv4, 0 ipv6 addrs for host 'worker-1'
+worker-1 crio[767]: 2025-04-25 13:56:26.305 [INFO][4178] ipam.go 660: Looking up existing affinities for host handle="k8s-pod-network.97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" host="worker-1"
+worker-1 crio[767]: 2025-04-25 13:56:26.317 [INFO][4178] ipam.go 372: Looking up existing affinities for host host="worker-1"
+worker-1 crio[767]: 2025-04-25 13:56:26.327 [INFO][4178] ipam.go 489: Trying affinity for 192.168.226.64/26 host="worker-1"
+
+	Affinity Concept: In the context of Calico IPAM, affinity typically means the association between workloads and specific IP address ranges. Calico ensures that, if possible, a pod may receive the same IP address or be placed in a preferred address 
+	range based on previous assignments or constraints. This is important for maintaining consistent networking, especially for stateful workloads or services with strict networking requirements.
+	Calico looks for hist affinity at handle level, Hist level and subnet range
+
+
+***********************************************************************************************************************************************************
+	
+worker-1 crio[767]: 2025-04-25 13:56:26.331 [INFO][4178] ipam.go 155: Attempting to load block cidr=192.168.226.64/26 host="worker-1"
+
+	It indicates that Calico is trying to load a specific CIDR block (192.168.226.64/26) to manage IP address allocation for the pod or container being scheduled on worker-1.
+
+*********************************************************************************************************************************************************************************
+worker-1 crio[767]: 2025-04-25 13:56:26.339 [INFO][4178] ipam.go 232: Affinity is confirmed and block has been loaded cidr=192.168.226.64/26 host="worker-1"
+worker-1 crio[767]: 2025-04-25 13:56:26.339 [INFO][4178] ipam.go 1180: Attempting to assign 1 addresses from block block=192.168.226.64/26 handle="k8s-pod-network.97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" host="worker-1"
+worker-1 crio[767]: 2025-04-25 13:56:26.344 [INFO][4178] ipam.go 1685: Creating new handle: k8s-pod-network.97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e
+worker-1 crio[767]: 2025-04-25 13:56:26.356 [INFO][4178] ipam.go 1203: Writing block in order to claim IPs block=192.168.226.64/26 handle="k8s-pod-network.97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" host="worker-1"
+worker-1 crio[767]: 2025-04-25 13:56:26.369 [INFO][4178] ipam.go 1216: Successfully claimed IPs: [192.168.226.77/26] block=192.168.226.64/26 handle="k8s-pod-network.97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" host="worker-1"
+worker-1 crio[767]: 2025-04-25 13:56:26.369 [INFO][4178] ipam.go 847: Auto-assigned 1 out of 1 IPv4s: [192.168.226.77/26] handle="k8s-pod-network.97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" host="worker-1"
+worker-1 crio[767]: 2025-04-25 13:56:26.369 [INFO][4178] ipam_plugin.go 379: Released host-wide IPAM lock.
+worker-1 crio[767]: 2025-04-25 13:56:26.369 [INFO][4178] ipam_plugin.go 288: Calico CNI IPAM assigned addresses IPv4=[192.168.226.77/26] IPv6=[] ContainerID="97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" HandleID="k8s-pod-network.97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" Workload="worker--1-k8s-nginx--learning-eth0"
+worker-1 crio[767]: 2025-04-25 13:56:26.370 [INFO][4172] k8s.go 386: Populated endpoint ContainerID="97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" Namespace="learning" Pod="nginx-learning" WorkloadEndpoint="worker--1-k8s-nginx--learning-eth0" endpoint=&v3.WorkloadEndpoint{TypeMeta:v1.TypeMeta{Kind:"WorkloadEndpoint", APIVersion:"projectcalico.org/v3"}, ObjectMeta:v1.ObjectMeta{Name:"worker--1-k8s-nginx--learning-eth0", GenerateName:"", Namespace:"learning", SelfLink:"", UID:"0ebc1e17-c524-4f35-856a-14c7a768a37a", ResourceVersion:"466259", Generation:0, CreationTimestamp:time.Date(2025, time.April, 25, 13, 56, 25, 0, time.Local), DeletionTimestamp:<nil>, DeletionGracePeriodSeconds:(*int64)(nil), Labels:map[string]string{"projectcalico.org/namespace":"learning", "projectcalico.org/orchestrator":"k8s", "projectcalico.org/serviceaccount":"default", "run":"nginx-learning"}, Annotations:map[string]string(nil), OwnerReferences:[]v1.OwnerReference(nil), Finalizers:[]string(nil), ManagedFields:[]v1.ManagedFieldsEntry(nil)}, Spec:v3.WorkloadEndpointSpec{Orchestrator:"k8s", Workload:"", Node:"worker-1", ContainerID:"", Pod:"nginx-learning", Endpoint:"eth0", ServiceAccountName:"default", IPNetworks:[]string{"192.168.226.77/32"}, IPNATs:[]v3.IPNAT(nil), IPv4Gateway:"", IPv6Gateway:"", Profiles:[]string{"kns.learning", "ksa.learning.default"}, InterfaceName:"calia75c70ad211", MAC:"", Ports:[]v3.WorkloadEndpointPort(nil), AllowSpoofedSourcePrefixes:[]string(nil)}}
+worker-1 crio[767]: 2025-04-25 13:56:26.370 [INFO][4172] k8s.go 387: Calico CNI using IPs: [192.168.226.77/32] ContainerID="97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" Namespace="learning" Pod="nginx-learning" WorkloadEndpoint="worker--1-k8s-nginx--learning-eth0"
+worker-1 crio[767]: 2025-04-25 13:56:26.370 [INFO][4172] dataplane_linux.go 68: Setting the host side veth name to calia75c70ad211 ContainerID="97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" Namespace="learning" Pod="nginx-learning" WorkloadEndpoint="worker--1-k8s-nginx--learning-eth0"
+worker-1 crio[767]: 2025-04-25 13:56:26.376 [INFO][4172] dataplane_linux.go 479: Disabling IPv4 forwarding ContainerID="97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" Namespace="learning" Pod="nginx-learning" WorkloadEndpoint="worker--1-k8s-nginx--learning-eth0"
+worker-1 crio[767]: 2025-04-25 13:56:26.377 [INFO][4172] k8s.go 414: Added Mac, interface name, and active container ID to endpoint ContainerID="97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" Namespace="learning" Pod="nginx-learning" WorkloadEndpoint="worker--1-k8s-nginx--learning-eth0" endpoint=&v3.WorkloadEndpoint{TypeMeta:v1.TypeMeta{Kind:"WorkloadEndpoint", APIVersion:"projectcalico.org/v3"}, ObjectMeta:v1.ObjectMeta{Name:"worker--1-k8s-nginx--learning-eth0", GenerateName:"", Namespace:"learning", SelfLink:"", UID:"0ebc1e17-c524-4f35-856a-14c7a768a37a", ResourceVersion:"466259", Generation:0, CreationTimestamp:time.Date(2025, time.April, 25, 13, 56, 25, 0, time.Local), DeletionTimestamp:<nil>, DeletionGracePeriodSeconds:(*int64)(nil), Labels:map[string]string{"projectcalico.org/namespace":"learning", "projectcalico.org/orchestrator":"k8s", "projectcalico.org/serviceaccount":"default", "run":"nginx-learning"}, Annotations:map[string]string(nil), OwnerReferences:[]v1.OwnerReference(nil), Finalizers:[]string(nil), ManagedFields:[]v1.ManagedFieldsEntry(nil)}, Spec:v3.WorkloadEndpointSpec{Orchestrator:"k8s", Workload:"", Node:"worker-1", ContainerID:"97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e", Pod:"nginx-learning", Endpoint:"eth0", ServiceAccountName:"default", IPNetworks:[]string{"192.168.226.77/32"}, IPNATs:[]v3.IPNAT(nil), IPv4Gateway:"", IPv6Gateway:"", Profiles:[]string{"kns.learning", "ksa.learning.default"}, InterfaceName:"calia75c70ad211", MAC:"8a:2d:f0:2c:0f:38", Ports:[]v3.WorkloadEndpointPort(nil), AllowSpoofedSourcePrefixes:[]string(nil)}}
+worker-1 crio[767]: 2025-04-25 13:56:26.401 [INFO][4172] k8s.go 500: Wrote updated endpoint to datastore ContainerID="97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e" Namespace="learning" Pod="nginx-learning" WorkloadEndpoint="worker--1-k8s-nginx--learning-eth0"
+worker-1 crio[767]: time="2025-04-25T13:56:26.41254772-04:00" level=info msg="Got pod network &{Name:nginx-learning Namespace:learning ID:97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e UID:0ebc1e17-c524-4f35-856a-14c7a768a37a NetNS:/var/run/netns/5849ed50-6b81-458b-809d-f995f679bc23 Networks:[{Name:k8s-pod-network Ifname:eth0}] RuntimeConfig:map[k8s-pod-network:{IP: MAC: PortMappings:[] Bandwidth:<nil> IpRanges:[] CgroupPath:kubepods-besteffort-pod0ebc1e17_c524_4f35_856a_14c7a768a37a.slice PodAnnotations:0xc0011e6cf0}] Aliases:map[]}"
+worker-1 crio[767]: time="2025-04-25T13:56:26.412745974-04:00" level=info msg="Checking pod learning_nginx-learning for CNI network k8s-pod-network (type=calico)"
+worker-1 crio[767]: time="2025-04-25T13:56:26.424167381-04:00" level=info msg="Ran pod sandbox 97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e with infra container: learning/nginx-learning/POD" id=74f51986-3b92-44cb-a342-fb3c1a4d5bc5 name=/runtime.v1.RuntimeService/RunPodSandbox
+worker-1 crio[767]: time="2025-04-25T13:56:26.425798925-04:00" level=info msg="Pulling image: nginx:latest" id=eab67629-0e91-4676-9313-734007a9be55 name=/runtime.v1.ImageService/PullImage
+worker-1 crio[767]: time="2025-04-25T13:56:26.425961862-04:00" level=info msg="Resolving \"nginx\" using unqualified-search registries (/etc/containers/registries.conf.d/crio.conf)"
+worker-1 crio[767]: time="2025-04-25T13:56:26.484126493-04:00" level=info msg="Trying to access \"docker.io/library/nginx:latest\""
+worker-1 crio[767]: time="2025-04-25T13:56:27.159616042-04:00" level=info msg="Pulled image: docker.io/library/nginx@sha256:69747b174b56bc170ca99a6d8e7a80e77a020c9702dda7e44a2154066a7a4dbe" id=eab67629-0e91-4676-9313-734007a9be55 name=/runtime.v1.ImageService/PullImage
+worker-1 crio[767]: time="2025-04-25T13:56:27.1605954-04:00" level=info msg="Checking image status: nginx:latest" id=5e07dd59-fa09-41b1-85ce-42d9d8c3e788 name=/runtime.v1.ImageService/ImageStatus
+worker-1 crio[767]: time="2025-04-25T13:56:27.160736839-04:00" level=info msg="Resolving \"nginx\" using unqualified-search registries (/etc/containers/registries.conf.d/crio.conf)"
+worker-1 crio[767]: time="2025-04-25T13:56:27.160835196-04:00" level=info msg="Image status: &ImageStatusResponse{Image:&Image{Id:4e1b6bae1e48cdbde8e6ec3e6ee42d86ad4780156e75790465bf6fb16c551c27,RepoTags:[docker.io/library/nginx:latest],RepoDigests:[docker.io/library/nginx@sha256:5ed8fcc66f4ed123c1b2560ed708dc148755b6e4cbd8b943fab094f2c6bfa91e docker.io/library/nginx@sha256:69747b174b56bc170ca99a6d8e7a80e77a020c9702dda7e44a2154066a7a4dbe],Size_:196639608,Uid:nil,Username:,Spec:&ImageSpec{Image:,Annotations:map[string]string{com.docker.official-images.bashbrew.arch: amd64,org.opencontainers.image.base.digest: sha256:4b44499bc2a6c78d726f3b281e6798009c0ae1f034b0bfaf6a227147dcff928b,org.opencontainers.image.base.name: debian:bookworm-slim,org.opencontainers.image.created: 2025-04-16T14:50:31Z,org.opencontainers.image.revision: eaf8875a1967d24cea6ed8b37109075e39ed9e43,org.opencontainers.image.source: https://github.com/nginx/docker-nginx.git#eaf8875a1967d24cea6ed8b37109075e39ed9e43:mainline/debian,org.opencontainers.image.url: https://hub.docker.com/_/nginx,org.opencontainers.image.version: 1.27.5,},UserSpecifiedImage:,RuntimeHandler:,},Pinned:false,},Info:map[string]string{},}" id=5e07dd59-fa09-41b1-85ce-42d9d8c3e788 name=/runtime.v1.ImageService/ImageStatus
+worker-1 crio[767]: time="2025-04-25T13:56:27.163421814-04:00" level=info msg="Checking image status: nginx" id=5f27a847-fc04-458f-805e-6323ff1b187c name=/runtime.v1.ImageService/ImageStatus
+worker-1 crio[767]: time="2025-04-25T13:56:27.164316134-04:00" level=info msg="Resolving \"nginx\" using unqualified-search registries (/etc/containers/registries.conf.d/crio.conf)"
+worker-1 crio[767]: time="2025-04-25T13:56:27.164691259-04:00" level=info msg="Image status: &ImageStatusResponse{Image:&Image{Id:4e1b6bae1e48cdbde8e6ec3e6ee42d86ad4780156e75790465bf6fb16c551c27,RepoTags:[docker.io/library/nginx:latest],RepoDigests:[docker.io/library/nginx@sha256:5ed8fcc66f4ed123c1b2560ed708dc148755b6e4cbd8b943fab094f2c6bfa91e docker.io/library/nginx@sha256:69747b174b56bc170ca99a6d8e7a80e77a020c9702dda7e44a2154066a7a4dbe],Size_:196639608,Uid:nil,Username:,Spec:&ImageSpec{Image:,Annotations:map[string]string{com.docker.official-images.bashbrew.arch: amd64,org.opencontainers.image.base.digest: sha256:4b44499bc2a6c78d726f3b281e6798009c0ae1f034b0bfaf6a227147dcff928b,org.opencontainers.image.base.name: debian:bookworm-slim,org.opencontainers.image.created: 2025-04-16T14:50:31Z,org.opencontainers.image.revision: eaf8875a1967d24cea6ed8b37109075e39ed9e43,org.opencontainers.image.source: https://github.com/nginx/docker-nginx.git#eaf8875a1967d24cea6ed8b37109075e39ed9e43:mainline/debian,org.opencontainers.image.url: https://hub.docker.com/_/nginx,org.opencontainers.image.version: 1.27.5,},UserSpecifiedImage:,RuntimeHandler:,},Pinned:false,},Info:map[string]string{},}" id=5f27a847-fc04-458f-805e-6323ff1b187c name=/runtime.v1.ImageService/ImageStatus
+worker-1 crio[767]: time="2025-04-25T13:56:27.173804842-04:00" level=info msg="Creating container: learning/nginx-learning/nginx-learning" id=3e6d7cbc-e759-4dd0-9fb8-875c00a2b5b8 name=/runtime.v1.RuntimeService/CreateContainer
+worker-1 crio[767]: time="2025-04-25T13:56:27.174601776-04:00" level=info msg="Allowed annotations are specified for workload [io.containers.trace-syscall]"
+worker-1 crio[767]: time="2025-04-25T13:56:27.182375839-04:00" level=info msg="Allowed annotations are specified for workload [io.containers.trace-syscall]"
+worker-1 crio[767]: time="2025-04-25T13:56:27.220215322-04:00" level=info msg="Allowed annotations are specified for workload [io.containers.trace-syscall]"
+worker-1 crio[767]: time="2025-04-25T13:56:27.266214528-04:00" level=info msg="Created container d9f971f739d8bcc29bc2ea96f07cd64ce6b360b0ad25a6a56f1491259f4a1ed2: learning/nginx-learning/nginx-learning" id=3e6d7cbc-e759-4dd0-9fb8-875c00a2b5b8 name=/runtime.v1.RuntimeService/CreateContainer
+worker-1 crio[767]: time="2025-04-25T13:56:27.268107549-04:00" level=info msg="Starting container: d9f971f739d8bcc29bc2ea96f07cd64ce6b360b0ad25a6a56f1491259f4a1ed2" id=9690b56c-ce88-41cd-995c-1f289f5f7cfe name=/runtime.v1.RuntimeService/StartContainer
+worker-1 crio[767]: time="2025-04-25T13:56:27.275530589-04:00" level=info msg="Started container" PID=4211 containerID=d9f971f739d8bcc29bc2ea96f07cd64ce6b360b0ad25a6a56f1491259f4a1ed2 description=learning/nginx-learning/nginx-learning id=9690b56c-ce88-41cd-995c-1f289f5f7cfe name=/runtime.v1.RuntimeService/StartContainer sandboxID=97980b65071f85d10bc60cf890de2f9b8f16f30fbf79bef57f7355bbaeb3939e
+worker-1 crio[767]: time="2025-04-25T13:56:34.64307724-04:00" level=info msg="cleanup sandbox network"
+worker-1 crio[767]: time="2025-04-25T13:56:34.643230232-04:00" level=info msg="Got pod network &{Name: Namespace: ID:4609197a299cbb4fbe9a17bca7bb173c606a86911a485a9e25ab709b14350ff1 UID:f2445eb7-3219-4952-805e-25cd5695d11f NetNS: Networks:[{Name:k8s-pod-network Ifname:eth0}] RuntimeConfig:map[k8s-pod-network:{IP: MAC: PortMappings:[] Bandwidth:<nil> IpRanges:[] CgroupPath:kubepods-besteffort-podf2445eb7_3219_4952_805e_25cd5695d11f.slice PodAnnotations:0xc0011e7998}] Aliases:map[]}"
+worker-1 crio[767]: time="2025-04-25T13:56:34.643247278-04:00" level=error msg="Error loading cached network config: network \"k8s-pod-network\" not found in CNI cache"
+worker-1 crio[767]: time="2025-04-25T13:56:34.643251249-04:00" level=warning msg="Falling back to loading from existing plugins on disk"
+worker-1 crio[767]: time="2025-04-25T13:56:34.643255493-04:00" level=info msg="Deleting pod _ from CNI network \"k8s-pod-network\" (type=calico)"
+worker-1 crio[767]: time="2025-04-25T13:56:34.742067202-04:00" level=error msg="Failed to cleanup (probably retrying): failed to destroy network for pod sandbox k8s_test-pod-w1_learning_f2445eb7-3219-4952-805e-25cd5695d11f_0(4609197a299cbb4fbe9a17bca7bb173c606a86911a485a9e25ab709b14350ff1): error removing pod _ from CNI network \"k8s-pod-network\": plugin type=\"calico\" failed (delete): insufficient identifiers, missing 'worker--1-cni-4609197a299cbb4fbe9a17bca7bb173c606a86911a485a9e25ab709b14350ff1-eth0': stat netns path \"\": stat : no such file or directory"
